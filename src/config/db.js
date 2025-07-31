@@ -8,14 +8,16 @@ const pool = new Pool({
   database: "employees_db",
 });
 
-pool.connect()
-  .then(client => {
-    console.log("Conexión a PostgreSQL");
-    client.release();
-  })
-  .catch(err => {
-    console.error("Error al conectar a PostgreSQL:", err.message);
-  });
+if (process.env.NODE_ENV !== "test") {
+  pool.connect()
+    .then(client => {
+      console.log("Conexión a PostgreSQL");
+      client.release();
+    })
+    .catch(err => {
+      console.error("Error al conectar a PostgreSQL:", err.message);
+    });
+}
 
 module.exports = {
   query: (text, params) => pool.query(text, params),

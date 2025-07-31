@@ -29,3 +29,8 @@ Añadir un server en pgAdmin conexión con:
 Host: db
 User: admin
 Password: 123456
+
+Tests
+npm install --save-dev jest node-mocks-http
+Ejecutar los tests con:
+npm test
