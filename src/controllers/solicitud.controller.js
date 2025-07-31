@@ -4,11 +4,24 @@ const Solicitud = require("../models/solicitud.model");
 const createSolicitud = async (req, res) => {
   try {
     const { codigo, descripcion, resumen, user_id } = req.body;
-    const empleado = await db.query("SELECT * FROM empleado WHERE id = $1", [user_id]);
-    if (empleado.rows.length === 0) {
+    const empleadoResult = await db.query(
+      "SELECT user_id FROM empleado WHERE user_id = $1",
+      [user_id]
+    );
+
+    if (empleadoResult.rows.length === 0) {
       return res.status(400).json({ message: "El empleado no existe" });
     }
-    const solicitud = await Solicitud.create({ codigo, descripcion, resumen, user_id, status: false });
+
+    const id_empleado = empleadoResult.rows[0].user_id;
+    const solicitud = await Solicitud.create({
+      codigo,
+      descripcion,
+      resumen,
+      id_empleado,
+      status: false,
+    });
+
     res.status(201).json({ message: "Solicitud creada", data: solicitud });
   } catch (error) {
     res.status(500).json({ message: "Error al crear solicitud", error: error.message });
@@ -26,14 +39,14 @@ const getSolicitudes = async (req, res) => {
 
 const getSolicitudesByUserId = async (req, res) => {
   try {
-    const { user_id } = req.query;
-    if (!user_id) {
-      return res.status(400).json({ message: "El ID del usuario es requerido" });
+    const { id_empleado } = req.query;
+    if (!id_empleado) {
+      return res.status(400).json({ message: "El ID del empleado es requerido" });
     }
-    const solicitudes = await Solicitud.getByUserId(user_id);
+    const solicitudes = await Solicitud.getByUserId(id_empleado);
     res.status(200).json(solicitudes);
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener solicitudes por ID de usuario", error: error.message });
+    res.status(500).json({ message: "Error al obtener solicitudes por ID de empleado", error: error.message });
   }
 };
 
@@ -64,10 +77,35 @@ const updateSolicitudStatus = async (req, res) => {
   }
 };
 
+const updateSolicitud = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { codigo, descripcion, resumen } = req.body;
+
+    const updated = await Solicitud.updateSolicitud(id, {
+      codigo,
+      descripcion,
+      resumen
+    });
+
+    if (!updated) {
+      return res.status(404).json({ message: "Solicitud no encontrada" });
+    }
+
+    res.status(200).json({ message: "Solicitud actualizada", data: updated });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al actualizar solicitud",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createSolicitud,
   getSolicitudes,
   getSolicitudesByUserId,
   deleteSolicitud,
   updateSolicitudStatus,
+  updateSolicitud
 };

@@ -6,6 +6,7 @@ const {
   getSolicitudesByUserId,
   deleteSolicitud,
   updateSolicitudStatus,
+  updateSolicitud
 } = require("../controllers/solicitud.controller");
 const authenticateToken = require("../middlewares/auth.middleware");
 const authorizeRoles = require("../middlewares/roles.middleware");
@@ -13,6 +14,7 @@ const authorizeRoles = require("../middlewares/roles.middleware");
 router.post("/", authenticateToken, createSolicitud);
 router.get("/", authenticateToken, getSolicitudes);
 router.get("/user", authenticateToken, getSolicitudesByUserId);
+router.put("/:id", authenticateToken, authorizeRoles("empleado"), updateSolicitud);
 router.put("/:id/status", authenticateToken, authorizeRoles("admin"), updateSolicitudStatus);
 router.delete("/:id", authenticateToken, authorizeRoles("admin", "empleado"), deleteSolicitud);
 

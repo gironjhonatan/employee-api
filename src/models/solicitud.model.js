@@ -1,13 +1,13 @@
 const db = require("../config/db");
 
 const Solicitud = {
-  async create({ codigo, descripcion, resumen, user_id, status }) {
+  async create({ codigo, descripcion, resumen, id_empleado, status }) {
     const query = `
-      INSERT INTO solicitud (codigo, descripcion, resumen, user_id, status)
+      INSERT INTO solicitud (codigo, descripcion, resumen, id_empleado, status)
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `;
-    const values = [codigo, descripcion, resumen, user_id, status];
+    const values = [codigo, descripcion, resumen, id_empleado, status];
     const result = await db.query(query, values);
     return result.rows[0];
   },
@@ -17,9 +17,9 @@ const Solicitud = {
     return result.rows;
   },
 
-  async getByUserId(user_id) {
-    const query = 'SELECT * FROM solicitud WHERE user_id = $1';
-    const { rows } = await db.query(query, [user_id]);
+  async getByUserId(id_empleado) {
+    const query = 'SELECT * FROM solicitud WHERE id_empleado = $1';
+    const { rows } = await db.query(query, [id_empleado]);
     return rows;
   },
 
@@ -34,6 +34,20 @@ const Solicitud = {
     );
     return result.rows[0];
   },
+
+  async updateSolicitud(id, data) {
+    const { codigo, descripcion, resumen } = data;
+    const query = `
+      UPDATE solicitud
+      SET codigo = $1, descripcion = $2, resumen = $3
+      WHERE id = $4
+      RETURNING *;
+    `;
+    const values = [codigo, descripcion, resumen, id];
+    const result = await db.query(query, values);
+    return result.rows[0];
+  }
+
 };
 
 module.exports = Solicitud;
